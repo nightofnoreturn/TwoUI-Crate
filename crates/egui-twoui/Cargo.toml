@@ -1,0 +1,25 @@
+[package]
+name = "egui-twoui"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Modular UI toolkit for egui: tokens, icons, widgets, and adaptive desktop layouts"
+keywords = ["egui", "gui", "ui", "widgets", "design-system"]
+categories = ["gui"]
+
+[features]
+default = ["icons", "widgets", "layouts", "qrcode", "font"]
+icons = ["dep:egui-twoui-icons"]
+widgets = ["dep:egui-twoui-widgets", "icons"]
+layouts = ["dep:egui-twoui-layouts", "widgets", "icons"]
+qrcode = ["egui-twoui-widgets?/qrcode"]
+font = ["egui-twoui-tokens/font"]
+
+[dependencies]
+egui.workspace = true
+egui-twoui-tokens.workspace = true
+egui-twoui-icons = { workspace = true, optional = true }
+egui-twoui-widgets = { workspace = true, optional = true }
+egui-twoui-layouts = { workspace = true, optional = true }

@@ -1,0 +1,20 @@
+[package]
+name = "egui-twoui-widgets"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Buttons, cards, controls, pickers, seekbars, progress, tabs, and QR widgets for egui"
+keywords = ["egui", "widgets", "gui", "ui"]
+categories = ["gui"]
+
+[features]
+default = ["qrcode"]
+qrcode = ["dep:qrcode"]
+
+[dependencies]
+egui.workspace = true
+egui-twoui-tokens.workspace = true
+egui-twoui-icons.workspace = true
+qrcode = { workspace = true, optional = true }

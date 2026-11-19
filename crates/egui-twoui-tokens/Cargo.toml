@@ -1,0 +1,17 @@
+[package]
+name = "egui-twoui-tokens"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Design tokens, light/dark palettes, variable typography, and motion helpers for egui"
+keywords = ["egui", "gui", "theme", "tokens", "typography"]
+categories = ["gui"]
+
+[features]
+default = ["font"]
+font = []
+
+[dependencies]
+egui.workspace = true

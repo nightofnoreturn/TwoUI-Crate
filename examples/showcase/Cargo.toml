@@ -1,0 +1,11 @@
+[package]
+name = "twoui-showcase"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+egui.workspace = true
+eframe.workspace = true
+egui-twoui.workspace = true

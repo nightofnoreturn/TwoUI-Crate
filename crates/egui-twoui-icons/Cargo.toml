@@ -1,0 +1,14 @@
+[package]
+name = "egui-twoui-icons"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+description = "Bundled SVG vector icons rasterized via resvg for egui"
+keywords = ["egui", "icons", "svg", "gui"]
+categories = ["gui"]
+
+[dependencies]
+egui.workspace = true
+resvg.workspace = true
