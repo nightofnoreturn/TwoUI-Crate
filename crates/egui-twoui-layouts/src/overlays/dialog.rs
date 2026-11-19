@@ -5,7 +5,7 @@ use egui::{
     Sense, Stroke, Ui,
 };
 use egui_twoui_tokens::{
-    animate_toggle_ctx, dimens, ease_sine_out_80, elevation_shadow, font_id_for,
+    animate_toggle_ctx, dimens, ease_sine_out_80, font_id_for, show_frosted_frame,
     theme_from_ctx, ElevationTier, TwoUiFontWeight,
 };
 use egui_twoui_widgets::{
@@ -80,15 +80,11 @@ impl<'a> TwoUiDialog<'a> {
         let dark = theme.mode.is_dark();
         let p = &theme.palette;
 
-        let mut frame = Frame::NONE
-            .fill(p.floating_surface.gamma_multiply(alpha_t))
-            .corner_radius(CornerRadius::same(dimens::DIALOG_CORNER_RADIUS))
-            .stroke(Stroke::new(0.8, p.floating_stroke.gamma_multiply(alpha_t)))
-            .inner_margin(Margin::symmetric(24, 22));
-        if alpha_t > 0.3 {
-            frame = frame.shadow(elevation_shadow(ElevationTier::Lg, dark));
-        }
-
+        let tier = if alpha_t > 0.3 {
+            ElevationTier::Lg
+        } else {
+            ElevationTier::Zero
+        };
         let area = Area::new(Id::unique((self.id_salt, "twoui_dlg_area")))
             .anchor(Align2::CENTER_CENTER, vec2(0.0, (1.0 - slide_t) * 14.0))
             .order(Order::Foreground);
@@ -97,73 +93,84 @@ impl<'a> TwoUiDialog<'a> {
         let modal_resp = Modal::new(Id::unique(self.id_salt))
             .area(area)
             .backdrop_color(p.backdrop.gamma_multiply(alpha_t))
-            .frame(frame)
+            .frame(Frame::NONE)
             .show(ctx, |ui| {
-                ui.multiply_opacity(alpha_t);
-                ui.set_width(self.width);
-                ui.spacing_mut().item_spacing.y = 12.0;
+                show_frosted_frame(
+                    ui,
+                    CornerRadius::same(dimens::DIALOG_CORNER_RADIUS),
+                    p.floating_surface.gamma_multiply(alpha_t),
+                    Margin::symmetric(24, 22),
+                    tier,
+                    dark,
+                    |ui| {
+                        ui.multiply_opacity(alpha_t);
+                        ui.set_width(self.width);
+                        ui.spacing_mut().item_spacing.y = 12.0;
 
-                ui.label(
-                    RichText::new(self.title)
-                        .font(font_id_for(
-                            ui.ctx(),
-                            dimens::TEXT_DIALOG_TITLE,
-                            TwoUiFontWeight::SemiBold,
-                        ))
-                        .color(p.text_primary),
-                );
+                        ui.label(
+                            RichText::new(self.title)
+                                .font(font_id_for(
+                                    ui.ctx(),
+                                    dimens::TEXT_DIALOG_TITLE,
+                                    TwoUiFontWeight::SemiBold,
+                                ))
+                                .color(p.text_primary),
+                        );
 
-                if let Some(body) = self.body {
-                    ui.label(
-                        RichText::new(body)
-                            .size(dimens::TEXT_BODY)
-                            .color(p.text_secondary),
-                    );
-                }
-
-                if let Some((checked, label)) = single_choice {
-                    ui.add(TwoUiCheckBox::new(checked).label(label));
-                }
-
-                extra_content(ui);
-
-                if !self.actions.is_empty() {
-                    ui.add_space(6.0);
-                    let count = self.actions.len();
-                    let btn_w = ((self.width - (count as f32 - 1.0) * 12.0) / count as f32).max(70.0);
-                    ui.horizontal(|ui| {
-                        for (idx, act) in self.actions.iter().enumerate() {
-                            if idx > 0 {
-                                let (div_rect, _) =
-                                    ui.allocate_exact_size(vec2(12.0, 22.0), Sense::hover());
-                                let x = div_rect.center().x;
-                                ui.painter().line_segment(
-                                    [
-                                        pos2(x, div_rect.top() + 3.0),
-                                        pos2(x, div_rect.bottom() - 3.0),
-                                    ],
-                                    Stroke::new(1.0, p.divider.gamma_multiply(0.85)),
-                                );
-                            }
-
-                            let style = if act.destructive {
-                                TwoUiButtonStyle::Destructive
-                            } else {
-                                TwoUiButtonStyle::Transparent
-                            };
-                            let mut btn = TwoUiButton::new(act.label)
-                                .style(style)
-                                .corner_radius(dimens::DIALOG_BUTTON_CORNER_RADIUS)
-                                .min_size(vec2(btn_w, 40.0));
-                            if act.primary {
-                                btn = btn.text_color(p.primary_high);
-                            }
-                            if ui.add(btn).clicked() {
-                                clicked_action = Some(idx);
-                            }
+                        if let Some(body) = self.body {
+                            ui.label(
+                                RichText::new(body)
+                                    .size(dimens::TEXT_BODY)
+                                    .color(p.text_secondary),
+                            );
                         }
-                    });
-                }
+
+                        if let Some((checked, label)) = single_choice {
+                            ui.add(TwoUiCheckBox::new(checked).label(label));
+                        }
+
+                        extra_content(ui);
+
+                        if !self.actions.is_empty() {
+                            ui.add_space(6.0);
+                            let count = self.actions.len();
+                            let btn_w = ((self.width - (count as f32 - 1.0) * 12.0) / count as f32)
+                                .max(70.0);
+                            ui.horizontal(|ui| {
+                                for (idx, act) in self.actions.iter().enumerate() {
+                                    if idx > 0 {
+                                        let (div_rect, _) =
+                                            ui.allocate_exact_size(vec2(12.0, 22.0), Sense::hover());
+                                        let x = div_rect.center().x;
+                                        ui.painter().line_segment(
+                                            [
+                                                pos2(x, div_rect.top() + 3.0),
+                                                pos2(x, div_rect.bottom() - 3.0),
+                                            ],
+                                            Stroke::new(1.0, p.divider.gamma_multiply(0.85)),
+                                        );
+                                    }
+
+                                    let style = if act.destructive {
+                                        TwoUiButtonStyle::Destructive
+                                    } else {
+                                        TwoUiButtonStyle::Transparent
+                                    };
+                                    let mut btn = TwoUiButton::new(act.label)
+                                        .style(style)
+                                        .corner_radius(dimens::DIALOG_BUTTON_CORNER_RADIUS)
+                                        .min_size(vec2(btn_w, 40.0));
+                                    if act.primary {
+                                        btn = btn.text_color(p.primary_high);
+                                    }
+                                    if ui.add(btn).clicked() {
+                                        clicked_action = Some(idx);
+                                    }
+                                }
+                            });
+                        }
+                    },
+                );
             });
 
         if modal_resp.backdrop_response.clicked() || ctx.input(|i| i.key_pressed(egui::Key::Escape))

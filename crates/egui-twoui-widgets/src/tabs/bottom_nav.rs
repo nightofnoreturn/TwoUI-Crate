@@ -1,9 +1,10 @@
 use egui::{pos2, vec2, CornerRadius, Frame, Id, Margin, Popup, Rect, Response, Sense, Stroke, Ui};
 use egui_twoui_icons::TwoUiIcon;
 use egui_twoui_tokens::{
-    animate_toggle, concentric_radius, ease_fast_out_slow_in, elevation_shadow, font_id,
-    interaction_factors, paint_floating_capsule, paint_pill_press_ripple, paint_state_overlay,
-    recoil_rect, theme_from_ui, tokens::dimens, ElevationTier, TwoUiFontWeight, TwoUiPalette,
+    animate_toggle, concentric_radius, ease_fast_out_slow_in, font_id, interaction_factors,
+    paint_floating_capsule, paint_pill_press_ripple, paint_state_overlay, recoil_rect,
+    show_frosted_frame, theme_from_ui, tokens::dimens, ElevationTier, TwoUiFontWeight,
+    TwoUiPalette,
 };
 
 use super::{floating_capsule_colors, paint_nav_slot_contents};
@@ -288,62 +289,66 @@ fn show_overflow_popup_menu(
     p: &TwoUiPalette,
 ) -> Option<usize> {
     let mut clicked = None;
-    let popup_frame = Frame::NONE
-        .fill(p.floating_surface)
-        .corner_radius(CornerRadius::same(dimens::DIALOG_CORNER_RADIUS))
-        .stroke(Stroke::new(0.8, p.floating_stroke))
-        .inner_margin(Margin::symmetric(8, 8))
-        .shadow(elevation_shadow(ElevationTier::Md, dark));
 
     Popup::menu(more_resp)
-        .frame(popup_frame)
+        .frame(Frame::NONE)
         .width(176.0)
         .show(|ui| {
-            ui.ctx().data_mut(|d| d.insert_temp(open_id, true));
-            ui.spacing_mut().item_spacing.y = 2.0;
-            for (idx, ov) in overflow.iter().enumerate() {
-                if ov.divider_before {
-                    let w = ui.available_width().max(120.0);
-                    let (dr, _) = ui.allocate_exact_size(vec2(w, 8.0), Sense::hover());
-                    ui.painter().line_segment(
-                        [
-                            pos2(dr.left() + 8.0, dr.center().y),
-                            pos2(dr.right() - 8.0, dr.center().y),
-                        ],
-                        Stroke::new(1.0, p.divider),
-                    );
-                }
-                let w = ui.available_width().max(120.0);
-                let (row_r, row_resp) = ui.allocate_exact_size(vec2(w, 40.0), Sense::click());
-                if ui.is_rect_visible(row_r) {
-                    let (pt, ht) = interaction_factors(ui, &row_resp);
-                    paint_state_overlay(
-                        ui,
-                        recoil_rect(row_r, pt, 0.8),
-                        CornerRadius::same(16),
-                        p,
-                        ht,
-                        pt,
-                    );
-                    let g = ui.painter().layout_no_wrap(
-                        ov.label.to_owned(),
-                        font_id(ui, 15.0, TwoUiFontWeight::Regular),
-                        p.text_primary,
-                    );
-                    ui.painter().galley(
-                        pos2(row_r.left() + 14.0, row_r.center().y - g.size().y * 0.5),
-                        g,
-                        p.text_primary,
-                    );
-                    if let Some(b) = ov.badge {
-                        paint_badge(ui, pos2(row_r.right() - 18.0, row_r.center().y), b);
+            show_frosted_frame(
+                ui,
+                CornerRadius::same(dimens::DIALOG_CORNER_RADIUS),
+                p.floating_surface,
+                Margin::symmetric(8, 8),
+                ElevationTier::Md,
+                dark,
+                |ui| {
+                    ui.ctx().data_mut(|d| d.insert_temp(open_id, true));
+                    ui.spacing_mut().item_spacing.y = 2.0;
+                    for (idx, ov) in overflow.iter().enumerate() {
+                        if ov.divider_before {
+                            let w = ui.available_width().max(120.0);
+                            let (dr, _) = ui.allocate_exact_size(vec2(w, 8.0), Sense::hover());
+                            ui.painter().line_segment(
+                                [
+                                    pos2(dr.left() + 8.0, dr.center().y),
+                                    pos2(dr.right() - 8.0, dr.center().y),
+                                ],
+                                Stroke::new(1.0, p.divider),
+                            );
+                        }
+                        let w = ui.available_width().max(120.0);
+                        let (row_r, row_resp) = ui.allocate_exact_size(vec2(w, 40.0), Sense::click());
+                        if ui.is_rect_visible(row_r) {
+                            let (pt, ht) = interaction_factors(ui, &row_resp);
+                            paint_state_overlay(
+                                ui,
+                                recoil_rect(row_r, pt, 0.8),
+                                CornerRadius::same(16),
+                                p,
+                                ht,
+                                pt,
+                            );
+                            let g = ui.painter().layout_no_wrap(
+                                ov.label.to_owned(),
+                                font_id(ui, 15.0, TwoUiFontWeight::Regular),
+                                p.text_primary,
+                            );
+                            ui.painter().galley(
+                                pos2(row_r.left() + 14.0, row_r.center().y - g.size().y * 0.5),
+                                g,
+                                p.text_primary,
+                            );
+                            if let Some(b) = ov.badge {
+                                paint_badge(ui, pos2(row_r.right() - 18.0, row_r.center().y), b);
+                            }
+                        }
+                        if row_resp.clicked() {
+                            clicked = Some(idx);
+                            ui.close();
+                        }
                     }
-                }
-                if row_resp.clicked() {
-                    clicked = Some(idx);
-                    ui.close();
-                }
-            }
+                },
+            );
         });
     clicked
 }

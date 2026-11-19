@@ -6,7 +6,7 @@ use egui::{
 };
 use egui_twoui_icons::TwoUiIcon;
 use egui_twoui_tokens::{
-    concentric_radius, dimens, font_id, interaction_factors, paint_frosted_surface,
+    concentric_radius, dimens, elevation_shadow, font_id, interaction_factors,
     paint_pill_press_ripple, ElevationTier, TwoUiFontWeight, TwoUiTheme,
 };
 use egui_twoui_widgets::button::TwoUiIconButton;
@@ -59,15 +59,13 @@ pub(crate) fn paint_full_drawer_panel(
                 } else {
                     ElevationTier::Zero
                 };
-                paint_frosted_surface(
-                    ui,
-                    card_rect,
-                    CornerRadius::same(dimens::DRAWER_CORNER_RADIUS),
-                    p.drawer_surface.gamma_multiply(card_vis),
-                    p.floating_stroke.gamma_multiply(card_vis),
-                    tier,
-                    dark,
-                );
+                let card_r = CornerRadius::same(dimens::DRAWER_CORNER_RADIUS);
+                let shadow = elevation_shadow(tier, dark);
+                if shadow != egui::epaint::Shadow::NONE {
+                    ui.painter().add(shadow.as_shape(card_rect, card_r));
+                }
+                ui.painter()
+                    .rect_filled(card_rect, card_r, p.drawer_surface.gamma_multiply(card_vis));
             }
 
             if card_w >= 56.0 && interpolated_alpha > 0.01 {

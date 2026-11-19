@@ -1,5 +1,6 @@
 //! Design tokens, light/dark palettes, theme management, and touch recoil helpers for `egui`.
 
+pub mod backdrop_blur;
 pub mod feedback;
 pub mod palette;
 pub mod system_mode;
@@ -7,12 +8,15 @@ pub mod theme;
 pub mod tokens;
 pub mod typography;
 
+pub use backdrop_blur::{
+    enable_backdrop_blur, is_backdrop_blur_enabled, set_backdrop_blur_enabled,
+};
 pub use feedback::{
     animate_toggle, animate_toggle_ctx, concentric_radius, cubic_bezier,
     ease_fast_out_slow_in, ease_release, ease_sine_in_out_80, ease_sine_out_70,
     ease_sine_out_80, elevation_shadow, interaction_factors, interactive_fill,
     paint_floating_capsule, paint_frosted_surface, paint_pill_press_ripple, paint_state_overlay,
-    recoil_rect, ElevationTier,
+    recoil_rect, show_frosted_frame, ElevationTier,
 };
 pub use palette::{TwoUiMode, TwoUiPalette};
 pub use system_mode::detect_system_mode;

@@ -1,12 +1,12 @@
 use egui::{
     pos2, vec2, Align, CornerRadius, Frame, Id, Layout, Margin, Popup, Rect, Response, Role,
-    Sense, Stroke, Ui, Vec2, WidgetInfo,
+    Sense, Ui, Vec2, WidgetInfo,
 };
 use egui_twoui_icons::TwoUiIcon;
 use egui_twoui_tokens::{
-    animate_toggle, concentric_radius, ease_release, elevation_shadow, font_id,
-    interaction_factors, paint_floating_capsule, paint_pill_press_ripple, paint_state_overlay,
-    recoil_rect, theme_from_ui, tokens::dimens, ElevationTier, TwoUiFontWeight,
+    animate_toggle, concentric_radius, ease_release, font_id, interaction_factors,
+    paint_floating_capsule, paint_pill_press_ripple, paint_state_overlay, recoil_rect,
+    show_frosted_frame, theme_from_ui, tokens::dimens, ElevationTier, TwoUiFontWeight,
 };
 
 use super::{floating_capsule_colors, paint_nav_slot_contents, BottomNavItem};
@@ -207,98 +207,103 @@ impl<'a> MainTabBar<'a> {
             let cell_w = 80.0;
             let cell_h = 68.0;
             let grid_w = cols as f32 * cell_w + (cols - 1) as f32 * 4.0 + 24.0;
-            let popup_frame = Frame::NONE
-                .fill(p.floating_surface)
-                .corner_radius(CornerRadius::same(dimens::DIALOG_CORNER_RADIUS))
-                .stroke(Stroke::new(0.8, p.floating_stroke))
-                .inner_margin(Margin::symmetric(12, 12))
-                .shadow(elevation_shadow(ElevationTier::Lg, dark));
 
             Popup::menu(&more_resp)
-                .frame(popup_frame)
+                .frame(Frame::NONE)
                 .width(grid_w)
                 .show(|ui| {
-                    ui.ctx().data_mut(|d| d.insert_temp(open_id, true));
-                    let overflow_slice = &self.items[visible_count..];
-                    ui.spacing_mut().item_spacing = vec2(4.0, 6.0);
-                    for (row_idx, chunk) in overflow_slice.chunks(cols).enumerate() {
-                        ui.allocate_ui_with_layout(
-                            vec2(grid_w - 24.0, cell_h),
-                            Layout::left_to_right(Align::Center),
-                            |ui| {
-                                ui.spacing_mut().item_spacing.x = 4.0;
-                                for (col_idx, ov_item) in chunk.iter().enumerate() {
-                                    let actual_idx = visible_count + row_idx * cols + col_idx;
-                                    let (cell_r, cell_resp) = ui.allocate_exact_size(
-                                        vec2(cell_w, cell_h),
-                                        Sense::click(),
-                                    );
-                                    if ui.is_rect_visible(cell_r) {
-                                        let is_sel = *self.selected == actual_idx;
-                                        let (pt, ht) = interaction_factors(ui, &cell_resp);
-                                        let pr = recoil_rect(cell_r, pt, 1.0);
-                                        if is_sel {
-                                            ui.painter().rect_filled(
-                                                pr,
-                                                CornerRadius::same(16),
-                                                p.selected_bg,
+                    show_frosted_frame(
+                        ui,
+                        CornerRadius::same(dimens::DIALOG_CORNER_RADIUS),
+                        p.floating_surface,
+                        Margin::symmetric(12, 12),
+                        ElevationTier::Lg,
+                        dark,
+                        |ui| {
+                            ui.ctx().data_mut(|d| d.insert_temp(open_id, true));
+                            let overflow_slice = &self.items[visible_count..];
+                            ui.spacing_mut().item_spacing = vec2(4.0, 6.0);
+                            for (row_idx, chunk) in overflow_slice.chunks(cols).enumerate() {
+                                ui.allocate_ui_with_layout(
+                                    vec2(grid_w - 24.0, cell_h),
+                                    Layout::left_to_right(Align::Center),
+                                    |ui| {
+                                        ui.spacing_mut().item_spacing.x = 4.0;
+                                        for (col_idx, ov_item) in chunk.iter().enumerate() {
+                                            let actual_idx =
+                                                visible_count + row_idx * cols + col_idx;
+                                            let (cell_r, cell_resp) = ui.allocate_exact_size(
+                                                vec2(cell_w, cell_h),
+                                                Sense::click(),
                                             );
-                                        }
-                                        paint_state_overlay(
-                                            ui,
-                                            pr,
-                                            CornerRadius::same(16),
-                                            p,
-                                            ht,
-                                            pt,
-                                        );
-
-                                        let fg = if is_sel {
-                                            p.primary_high
-                                        } else {
-                                            p.text_primary
-                                        };
-                                        if let Some(icon) = ov_item.icon {
-                                            icon.paint(
-                                                ui,
-                                                Rect::from_center_size(
-                                                    pos2(pr.center().x, pr.top() + 21.0),
-                                                    Vec2::splat(22.0),
-                                                ),
-                                                fg,
-                                            );
-                                        }
-                                        let g = ui.painter().layout_no_wrap(
-                                            ov_item.label.to_owned(),
-                                            font_id(
-                                                ui,
-                                                11.5,
+                                            if ui.is_rect_visible(cell_r) {
+                                                let is_sel = *self.selected == actual_idx;
+                                                let (pt, ht) = interaction_factors(ui, &cell_resp);
+                                                let pr = recoil_rect(cell_r, pt, 1.0);
                                                 if is_sel {
-                                                    TwoUiFontWeight::SemiBold
+                                                    ui.painter().rect_filled(
+                                                        pr,
+                                                        CornerRadius::same(16),
+                                                        p.selected_bg,
+                                                    );
+                                                }
+                                                paint_state_overlay(
+                                                    ui,
+                                                    pr,
+                                                    CornerRadius::same(16),
+                                                    p,
+                                                    ht,
+                                                    pt,
+                                                );
+
+                                                let fg = if is_sel {
+                                                    p.primary_high
                                                 } else {
-                                                    TwoUiFontWeight::Medium
-                                                },
-                                            ),
-                                            fg,
-                                        );
-                                        ui.painter().galley(
-                                            pos2(
-                                                pr.center().x - g.size().x * 0.5,
-                                                pr.bottom() - 15.0 - g.size().y * 0.5,
-                                            ),
-                                            g,
-                                            fg,
-                                        );
-                                    }
-                                    if cell_resp.clicked() {
-                                        *self.selected = actual_idx;
-                                        response.mark_changed();
-                                        ui.close();
-                                    }
-                                }
-                            },
-                        );
-                    }
+                                                    p.text_primary
+                                                };
+                                                if let Some(icon) = ov_item.icon {
+                                                    icon.paint(
+                                                        ui,
+                                                        Rect::from_center_size(
+                                                            pos2(pr.center().x, pr.top() + 21.0),
+                                                            Vec2::splat(22.0),
+                                                        ),
+                                                        fg,
+                                                    );
+                                                }
+                                                let g = ui.painter().layout_no_wrap(
+                                                    ov_item.label.to_owned(),
+                                                    font_id(
+                                                        ui,
+                                                        11.5,
+                                                        if is_sel {
+                                                            TwoUiFontWeight::SemiBold
+                                                        } else {
+                                                            TwoUiFontWeight::Medium
+                                                        },
+                                                    ),
+                                                    fg,
+                                                );
+                                                ui.painter().galley(
+                                                    pos2(
+                                                        pr.center().x - g.size().x * 0.5,
+                                                        pr.bottom() - 15.0 - g.size().y * 0.5,
+                                                    ),
+                                                    g,
+                                                    fg,
+                                                );
+                                            }
+                                            if cell_resp.clicked() {
+                                                *self.selected = actual_idx;
+                                                response.mark_changed();
+                                                ui.close();
+                                            }
+                                        }
+                                    },
+                                );
+                            }
+                        },
+                    );
                 });
         }
 

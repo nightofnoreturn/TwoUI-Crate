@@ -6,7 +6,7 @@ use egui::{
 };
 use egui_twoui_tokens::{
     animate_toggle_ctx, colors, ease_sine_out_80, elevation_shadow, font_id, font_id_for,
-    theme_from_ui, ElevationTier, TwoUiFontWeight,
+    show_frosted_frame, theme_from_ui, ElevationTier, TwoUiFontWeight,
 };
 
 /// Dark balloon tooltip (`#474747`) with downward pointer tail and optional action button.
@@ -180,15 +180,18 @@ impl TwoUiToastState {
             .order(Order::Foreground)
             .interactable(false)
             .show(ui.ctx(), |ui| {
-                Frame::NONE
-                    .fill(bg)
-                    .corner_radius(CornerRadius::same(22))
-                    .inner_margin(Margin::symmetric(21, 13))
-                    .shadow(elevation_shadow(ElevationTier::Md, true))
-                    .show(ui, |ui| {
+                show_frosted_frame(
+                    ui,
+                    CornerRadius::same(22),
+                    bg,
+                    Margin::symmetric(21, 13),
+                    ElevationTier::Md,
+                    true,
+                    |ui| {
                         let (r, _) = ui.allocate_exact_size(galley_size, Sense::hover());
                         ui.painter().galley(r.min, galley, fg);
-                    });
+                    },
+                );
             });
     }
 }

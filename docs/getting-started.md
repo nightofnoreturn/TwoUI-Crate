@@ -24,6 +24,7 @@ egui-twoui = { git = "https://github.com/nightofnoreturn/TwoUI-Crate", package =
 | `layouts` | Yes | `egui-twoui-layouts`, `widgets`, and `icons` |
 | `qrcode` | Yes | `TwoUiQrCode` widget |
 | `font` | Yes | Bundled Roboto Flex variable font (`TwoUiTypography`, `install_typography`) |
+| `blur` | Yes | GPU backdrop blur on floating surfaces when running with `eframe::Renderer::Glow` |
 
 ## Theme & Typography Setup
 
@@ -33,11 +34,16 @@ Initialize themes and typography once when setting up `eframe` (or inside your f
 use egui::{Color32, ThemePreference};
 use egui_twoui::prelude::*;
 
-pub fn setup(ctx: &egui::Context) {
-    install_typography(ctx, TwoUiTypography::tuned());
-    install_themes_with_preference(ctx, None, TwoUiMode::Dark, ThemePreference::System);
+pub fn setup(cc: &eframe::CreationContext<'_>) {
+    install_typography(&cc.egui_ctx, TwoUiTypography::tuned());
+    install_themes_with_preference(&cc.egui_ctx, None, TwoUiMode::Dark, ThemePreference::System);
+    if cc.gl.is_some() {
+        enable_backdrop_blur(&cc.egui_ctx);
+    }
 }
 ```
+
+Native backdrop blur requires `eframe` configured with `renderer: eframe::Renderer::Glow`; on other renderers or when disabled, floating surfaces fall back to translucent fills cleanly.
 
 Switch modes or customize accents dynamically:
 

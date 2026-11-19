@@ -2,10 +2,10 @@
 
 use egui::{
     vec2, Align2, Area, Color32, Context, CornerRadius, Frame, Id, Margin, Modal, Order, Rect,
-    RichText, ScrollArea, Sense, Stroke, Ui,
+    RichText, ScrollArea, Sense, Ui,
 };
 use egui_twoui_tokens::{
-    animate_toggle_ctx, dimens, ease_sine_out_80, elevation_shadow, font_id_for,
+    animate_toggle_ctx, dimens, ease_sine_out_80, font_id_for, show_frosted_frame,
     theme_from_ctx, ElevationTier, TwoUiFontWeight,
 };
 
@@ -55,24 +55,23 @@ impl<'a> TwoUiBottomSheet<'a> {
         let sheet_w = (ctx.content_rect().width() - 20.0)
             .min(self.max_width)
             .max(280.0);
-        let mut sheet_frame = Frame::NONE
-            .fill(p.surface_elevated.gamma_multiply(alpha_t))
-            .corner_radius(CornerRadius {
-                nw: dimens::DIALOG_CORNER_RADIUS,
-                ne: dimens::DIALOG_CORNER_RADIUS,
-                sw: 0,
-                se: 0,
-            })
-            .stroke(Stroke::new(0.8, p.floating_stroke.gamma_multiply(alpha_t)))
-            .inner_margin(Margin {
-                left: 0,
-                right: 0,
-                top: 10,
-                bottom: 20,
-            });
-        if alpha_t > 0.3 {
-            sheet_frame = sheet_frame.shadow(elevation_shadow(ElevationTier::Lg, dark));
-        }
+        let tier = if alpha_t > 0.3 {
+            ElevationTier::Lg
+        } else {
+            ElevationTier::Zero
+        };
+        let sheet_radius = CornerRadius {
+            nw: dimens::DIALOG_CORNER_RADIUS,
+            ne: dimens::DIALOG_CORNER_RADIUS,
+            sw: 0,
+            se: 0,
+        };
+        let sheet_margin = Margin {
+            left: 0,
+            right: 0,
+            top: 10,
+            bottom: 20,
+        };
 
         let area = Area::new(Id::unique(self.id_salt))
             .anchor(Align2::CENTER_BOTTOM, vec2(0.0, (1.0 - slide_t) * 56.0))
@@ -81,36 +80,47 @@ impl<'a> TwoUiBottomSheet<'a> {
         let modal_resp = Modal::new(Id::unique((self.id_salt, "modal")))
             .area(area)
             .backdrop_color(p.backdrop.gamma_multiply(alpha_t))
-            .frame(sheet_frame)
+            .frame(Frame::NONE)
             .show(ctx, |ui| {
-                ui.multiply_opacity(alpha_t);
-                ui.set_width(sheet_w);
-                ui.set_max_height(self.max_height);
+                show_frosted_frame(
+                    ui,
+                    sheet_radius,
+                    p.floating_surface.gamma_multiply(alpha_t),
+                    sheet_margin,
+                    tier,
+                    dark,
+                    |ui| {
+                        ui.multiply_opacity(alpha_t);
+                        ui.set_width(sheet_w);
+                        ui.set_max_height(self.max_height);
 
-                let (h_rect, _) = ui.allocate_exact_size(vec2(sheet_w, 16.0), Sense::hover());
-                let handle = Rect::from_center_size(h_rect.center(), vec2(44.0, 4.0));
-                let handle_col = Color32::from_rgba_unmultiplied(0x84, 0x84, 0x87, 128);
-                ui.painter()
-                    .rect_filled(handle, CornerRadius::same(2), handle_col);
+                        let (h_rect, _) =
+                            ui.allocate_exact_size(vec2(sheet_w, 16.0), Sense::hover());
+                        let handle = Rect::from_center_size(h_rect.center(), vec2(44.0, 4.0));
+                        let handle_col = Color32::from_rgba_unmultiplied(0x84, 0x84, 0x87, 128);
+                        ui.painter()
+                            .rect_filled(handle, CornerRadius::same(2), handle_col);
 
-                Frame::NONE
-                    .inner_margin(Margin::symmetric(24, 6))
-                    .show(ui, |ui| {
-                        ui.label(
-                            RichText::new(self.title)
-                                .font(font_id_for(
-                                    ui.ctx(),
-                                    dimens::TEXT_DIALOG_TITLE,
-                                    TwoUiFontWeight::SemiBold,
-                                ))
-                                .color(p.text_primary),
-                        );
-                        ui.add_space(10.0);
-                        ScrollArea::vertical()
-                            .id_salt((self.id_salt, "sheet_scroll"))
-                            .max_height((self.max_height - 92.0).max(120.0))
-                            .show(ui, content);
-                    });
+                        Frame::NONE
+                            .inner_margin(Margin::symmetric(24, 6))
+                            .show(ui, |ui| {
+                                ui.label(
+                                    RichText::new(self.title)
+                                        .font(font_id_for(
+                                            ui.ctx(),
+                                            dimens::TEXT_DIALOG_TITLE,
+                                            TwoUiFontWeight::SemiBold,
+                                        ))
+                                        .color(p.text_primary),
+                                );
+                                ui.add_space(10.0);
+                                ScrollArea::vertical()
+                                    .id_salt((self.id_salt, "sheet_scroll"))
+                                    .max_height((self.max_height - 92.0).max(120.0))
+                                    .show(ui, content);
+                            });
+                    },
+                );
             });
 
         if modal_resp.backdrop_response.clicked() || ctx.input(|i| i.key_pressed(egui::Key::Escape))

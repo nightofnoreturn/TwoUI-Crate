@@ -9,7 +9,7 @@
 #[cfg(feature = "widgets")]
 pub mod ext;
 
-pub use egui_twoui_tokens::{feedback, palette, system_mode, tokens, typography};
+pub use egui_twoui_tokens::{backdrop_blur, feedback, palette, system_mode, tokens, typography};
 
 /// Merged theme, palette, and system dark/light detection exports.
 pub mod theme {
@@ -36,22 +36,26 @@ pub use egui_twoui_icons::TwoUiIcon;
 pub use egui_twoui_tokens::{
     animate_toggle, animate_toggle_ctx, apply_theme, concentric_radius, cubic_bezier,
     detect_system_mode, ease_fast_out_slow_in, ease_release, ease_sine_in_out_80,
-    ease_sine_out_70, ease_sine_out_80, elevation_shadow, font_id, font_id_for, has_twoui_fonts,
-    install_custom_font, install_custom_variable_font, install_themes,
-    install_themes_with_preference, paint_floating_capsule, paint_frosted_surface,
-    reset_default_fonts, theme_from_ctx, theme_from_ui, ElevationTier, TwoUiFontWeight, TwoUiMode,
-    TwoUiPalette, TwoUiTheme, TwoUiTypography,
+    ease_sine_out_70, ease_sine_out_80, elevation_shadow, enable_backdrop_blur, font_id,
+    font_id_for, has_twoui_fonts, install_custom_font, install_custom_variable_font,
+    install_themes, install_themes_with_preference, is_backdrop_blur_enabled,
+    paint_floating_capsule, paint_frosted_surface, reset_default_fonts,
+    set_backdrop_blur_enabled, show_frosted_frame, theme_from_ctx, theme_from_ui, ElevationTier,
+    TwoUiFontWeight, TwoUiMode, TwoUiPalette, TwoUiTheme, TwoUiTypography,
 };
 #[cfg(feature = "font")]
 pub use egui_twoui_tokens::install_typography;
 
 /// Convenient re-exports for applications using `egui-twoui`.
 pub mod prelude {
+    pub use crate::backdrop_blur::{
+        enable_backdrop_blur, is_backdrop_blur_enabled, set_backdrop_blur_enabled,
+    };
     pub use crate::feedback::{
         animate_toggle, animate_toggle_ctx, concentric_radius, cubic_bezier,
         ease_fast_out_slow_in, ease_release, ease_sine_in_out_80, ease_sine_out_70,
         ease_sine_out_80, elevation_shadow, paint_floating_capsule, paint_frosted_surface,
-        ElevationTier,
+        show_frosted_frame, ElevationTier,
     };
     pub use crate::theme::{
         apply_theme, detect_system_mode, install_themes, install_themes_with_preference,

@@ -7,7 +7,7 @@ API catalog across `TwoUI-Crate` workspace crates (available directly via `egui_
 - **Palette & Modes:** `TwoUiMode`, `TwoUiPalette`, `detect_system_mode`
 - **Themes:** `TwoUiTheme`, `apply_theme`, `install_themes`, `install_themes_with_preference`, `theme_from_ctx`, `theme_from_ui`
 - **Typography:** `TwoUiTypography`, `TwoUiFontWeight`, `install_typography`, `install_custom_font`, `install_custom_variable_font`, `reset_default_fonts`, `has_twoui_fonts`, `font_id`, `font_id_for`
-- **Motion & Surfaces:** `ElevationTier`, `elevation_shadow`, `concentric_radius`, `paint_floating_capsule`, `paint_frosted_surface`, `cubic_bezier`, `ease_fast_out_slow_in`, `ease_sine_out_70`, `ease_sine_out_80`, `ease_sine_in_out_80`, `ease_release`, `animate_toggle`, `animate_toggle_ctx`
+- **Motion & Surfaces:** `ElevationTier`, `elevation_shadow`, `concentric_radius`, `paint_floating_capsule`, `paint_frosted_surface`, `show_frosted_frame`, `enable_backdrop_blur`, `set_backdrop_blur_enabled`, `is_backdrop_blur_enabled`, `cubic_bezier`, `ease_fast_out_slow_in`, `ease_sine_out_70`, `ease_sine_out_80`, `ease_sine_in_out_80`, `ease_release`, `animate_toggle`, `animate_toggle_ctx`
 
 ## Icons (`egui-twoui-icons`)
 

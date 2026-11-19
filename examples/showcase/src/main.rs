@@ -11,6 +11,7 @@ use app::ShowcaseApp;
 
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
+        renderer: eframe::Renderer::Glow,
         viewport: egui::ViewportBuilder::default()
             .with_title("TwoUI Showcase")
             .with_decorations(false)

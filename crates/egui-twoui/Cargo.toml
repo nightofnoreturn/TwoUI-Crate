@@ -10,12 +10,13 @@ keywords = ["egui", "gui", "ui", "widgets", "design-system"]
 categories = ["gui"]
 
 [features]
-default = ["icons", "widgets", "layouts", "qrcode", "font"]
+default = ["icons", "widgets", "layouts", "qrcode", "font", "blur"]
 icons = ["dep:egui-twoui-icons"]
 widgets = ["dep:egui-twoui-widgets", "icons"]
 layouts = ["dep:egui-twoui-layouts", "widgets", "icons"]
 qrcode = ["egui-twoui-widgets?/qrcode"]
 font = ["egui-twoui-tokens/font"]
+blur = ["egui-twoui-tokens/blur"]
 
 [dependencies]
 egui.workspace = true

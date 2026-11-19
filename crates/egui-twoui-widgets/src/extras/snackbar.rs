@@ -116,14 +116,12 @@ impl TwoUiSnackBarState {
 
                 let (rect, _) = ui.allocate_exact_size(vec2(cur_w, cur_h), Sense::hover());
                 let fill = colors::SUGGEST_SNACKBAR_BG.gamma_multiply(outer_alpha);
-                let stroke_col = Color32::from_rgba_unmultiplied(0xFF, 0xFF, 0xFF, 0x22)
-                    .gamma_multiply(outer_alpha);
                 paint_frosted_surface(
                     ui,
                     rect,
                     CornerRadius::same(22),
                     fill,
-                    stroke_col,
+                    Color32::TRANSPARENT,
                     ElevationTier::Md,
                     true,
                 );

@@ -1,8 +1,8 @@
 //! Touch press recoil, surface elevation, concentric corners, and cubic-Bézier motion helpers.
 
 use egui::{
-    epaint::Shadow, Color32, Context, CornerRadius, Id, Rect, Response, Stroke, StrokeKind, Ui,
-    Vec2,
+    epaint::Shadow, Color32, Context, CornerRadius, Frame, Id, InnerResponse, Margin, Rect,
+    Response, Shape, Ui, Vec2,
 };
 
 use crate::palette::TwoUiPalette;
@@ -49,27 +49,61 @@ pub fn concentric_radius(outer_radius: u8, inset: f32) -> CornerRadius {
     CornerRadius::same(inner)
 }
 
-/// Paints an elevated rounded surface with shadow, fill, and optional border stroke.
+/// Paints an elevated borderless frosted surface (using GPU backdrop blur when active).
 pub fn paint_frosted_surface(
     ui: &Ui,
     rect: Rect,
     corner_radius: CornerRadius,
     fill: Color32,
-    stroke_color: Color32,
+    _stroke_color: Color32,
     tier: ElevationTier,
     dark: bool,
 ) {
+    if let Some(blur_shape) =
+        crate::backdrop_blur::backdrop_blur_shape(ui.ctx(), rect, corner_radius, fill, tier, dark)
+    {
+        ui.painter().add(blur_shape);
+        return;
+    }
+
     let shadow = elevation_shadow(tier, dark);
     if shadow != Shadow::NONE {
         ui.painter().add(shadow.as_shape(rect, corner_radius));
     }
-    let stroke = if stroke_color.a() > 0 {
-        Stroke::new(0.75, stroke_color)
+    ui.painter().rect_filled(rect, corner_radius, fill);
+}
+
+/// Renders `add_contents` inside a borderless floating container backed by GPU backdrop blur
+/// when enabled, or a shadowed translucent fill otherwise.
+pub fn show_frosted_frame<R>(
+    ui: &mut Ui,
+    corner_radius: CornerRadius,
+    fill: Color32,
+    margin: Margin,
+    tier: ElevationTier,
+    dark: bool,
+    add_contents: impl FnOnce(&mut Ui) -> R,
+) -> InnerResponse<R> {
+    let shadow_idx = ui.painter().add(Shape::Noop);
+    let surface_idx = ui.painter().add(Shape::Noop);
+    let resp = Frame::NONE.inner_margin(margin).show(ui, add_contents);
+    let rect = resp.response.rect;
+
+    if let Some(blur_shape) =
+        crate::backdrop_blur::backdrop_blur_shape(ui.ctx(), rect, corner_radius, fill, tier, dark)
+    {
+        ui.painter().set(surface_idx, blur_shape);
     } else {
-        Stroke::NONE
-    };
-    ui.painter()
-        .rect(rect, corner_radius, fill, stroke, StrokeKind::Inside);
+        let shadow = elevation_shadow(tier, dark);
+        if shadow != Shadow::NONE {
+            ui.painter()
+                .set(shadow_idx, shadow.as_shape(rect, corner_radius));
+        }
+        ui.painter()
+            .set(surface_idx, Shape::rect_filled(rect, corner_radius, fill));
+    }
+
+    resp
 }
 
 /// Paints a floating capsule (`ElevationTier::Md`, borderless pill).

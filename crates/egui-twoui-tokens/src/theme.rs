@@ -86,7 +86,7 @@ impl TwoUiTheme {
         visuals.panel_fill = p.round_and_bg;
         visuals.window_fill = p.surface_elevated;
         visuals.window_corner_radius = CornerRadius::same(self.dialog_corner_radius);
-        visuals.window_stroke = Stroke::new(0.75, p.floating_stroke);
+        visuals.window_stroke = Stroke::NONE;
         visuals.window_shadow = if self.mode.is_dark() {
             Shadow {
                 offset: [0, 6],

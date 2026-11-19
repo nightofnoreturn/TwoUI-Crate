@@ -10,8 +10,11 @@ keywords = ["egui", "gui", "theme", "tokens", "typography"]
 categories = ["gui"]
 
 [features]
-default = ["font"]
+default = ["font", "blur"]
 font = []
+blur = ["dep:egui_glow", "dep:glow"]
 
 [dependencies]
 egui.workspace = true
+egui_glow = { workspace = true, optional = true }
+glow = { workspace = true, optional = true }

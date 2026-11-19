@@ -129,6 +129,9 @@ impl ShowcaseApp {
             initial_mode,
             egui::ThemePreference::System,
         );
+        if cc.gl.is_some() {
+            enable_backdrop_blur(&cc.egui_ctx);
+        }
 
         Self {
             page_id: 0,
